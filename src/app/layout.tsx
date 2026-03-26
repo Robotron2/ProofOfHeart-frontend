@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "ProofOfHeart",
-  description: "ProofOfHeart Frontend",
+  description:
+    "A decentralized launchpad where the community validates causes and contributions are accounted for on-chain.",
 };
 
 export default function RootLayout({

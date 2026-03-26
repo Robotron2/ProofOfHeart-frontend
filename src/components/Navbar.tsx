@@ -1,16 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 
-type NavLink = {
-  href: string;
-  label: string;
-};
-
-const navLinks: NavLink[] = [
+const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/explore", label: "Explore" },
+  { href: "/causes", label: "Explore Causes" },
   { href: "/about", label: "About" },
 ];
 
@@ -18,16 +14,20 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-black/5 bg-white/80 backdrop-blur dark:border-white/10 dark:bg-black/60">
+    <header className="sticky top-0 z-50 border-b border-black/5 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-zinc-900/80">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 rounded-md py-1 font-semibold tracking-tight text-zinc-950 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950/20 dark:text-zinc-50 dark:focus-visible:ring-white/20"
+          className="inline-flex items-center gap-2 rounded-md py-1 font-semibold tracking-tight text-zinc-950 hover:opacity-90 dark:text-zinc-50"
         >
-          <span className="grid size-8 place-items-center rounded-full bg-zinc-950 text-white dark:bg-white dark:text-black">
-            PH
-          </span>
-          <span className="hidden sm:inline">ProofOfHeart</span>
+          <Image
+            src="/proof-of-heart-logo.svg"
+            alt="ProofOfHeart Logo"
+            width={140}
+            height={42}
+            className="h-8 w-auto"
+            priority
+          />
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
@@ -35,7 +35,7 @@ export default function Navbar() {
             <Link
               key={link.href}
               href={link.href}
-              className="rounded-md px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-black/5 hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950/20 dark:text-zinc-200 dark:hover:bg-white/10 dark:hover:text-white dark:focus-visible:ring-white/20"
+              className="rounded-md px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-black/5 hover:text-zinc-950 dark:text-zinc-200 dark:hover:bg-white/10 dark:hover:text-white"
             >
               {link.label}
             </Link>
@@ -45,7 +45,7 @@ export default function Navbar() {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            className="hidden h-10 items-center justify-center rounded-full bg-zinc-950 px-4 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950/30 dark:bg-white dark:text-black dark:hover:bg-zinc-200 dark:focus-visible:ring-white/30 md:inline-flex"
+            className="hidden h-10 items-center justify-center rounded-full bg-gradient-to-r from-red-500 to-pink-500 px-5 text-sm font-semibold text-white transition-all hover:from-red-600 hover:to-pink-600 hover:shadow-lg md:inline-flex"
           >
             Connect Wallet
           </button>
@@ -54,8 +54,8 @@ export default function Navbar() {
             type="button"
             aria-controls="mobile-menu"
             aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((open) => !open)}
-            className="inline-flex size-10 items-center justify-center rounded-md border border-black/10 bg-white text-zinc-950 hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950/20 dark:border-white/15 dark:bg-black dark:text-white dark:hover:bg-white/10 dark:focus-visible:ring-white/20 md:hidden"
+            onClick={() => setMenuOpen((o) => !o)}
+            className="inline-flex size-10 items-center justify-center rounded-md border border-black/10 bg-white text-zinc-950 hover:bg-black/5 dark:border-white/15 dark:bg-zinc-900 dark:text-white dark:hover:bg-white/10 md:hidden"
           >
             <span className="sr-only">Toggle menu</span>
             <svg
@@ -85,7 +85,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {menuOpen ? (
+      {menuOpen && (
         <div id="mobile-menu" className="border-t border-black/5 dark:border-white/10 md:hidden">
           <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-3 sm:px-6">
             <nav aria-label="Mobile">
@@ -95,7 +95,7 @@ export default function Navbar() {
                     <Link
                       href={link.href}
                       onClick={() => setMenuOpen(false)}
-                      className="block rounded-md px-3 py-2 text-sm font-medium text-zinc-800 hover:bg-black/5 hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950/20 dark:text-zinc-200 dark:hover:bg-white/10 dark:hover:text-white dark:focus-visible:ring-white/20"
+                      className="block rounded-md px-3 py-2 text-sm font-medium text-zinc-800 hover:bg-black/5 hover:text-zinc-950 dark:text-zinc-200 dark:hover:bg-white/10 dark:hover:text-white"
                     >
                       {link.label}
                     </Link>
@@ -106,14 +106,13 @@ export default function Navbar() {
 
             <button
               type="button"
-              className="h-10 w-full rounded-full bg-zinc-950 px-4 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950/30 dark:bg-white dark:text-black dark:hover:bg-zinc-200 dark:focus-visible:ring-white/30"
+              className="h-10 w-full rounded-full bg-gradient-to-r from-red-500 to-pink-500 px-4 text-sm font-semibold text-white transition-all hover:from-red-600 hover:to-pink-600"
             >
               Connect Wallet
             </button>
           </div>
         </div>
-      ) : null}
+      )}
     </header>
   );
 }
-
