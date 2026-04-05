@@ -18,16 +18,11 @@ import RevenueSharingPanel from '@/components/RevenueSharingPanel';
 import DonationModal from '@/components/DonationModal';
 
 function formatDate(ts: number) {
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }).format(new Date(ts * 1000));
+  return new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(ts * 1000));
 }
 
 export default function CauseDetailClient({ id }: { id: string }) {
   const { publicKey: userWalletAddress } = useWallet();
-
   const { campaign: fetchedCampaign, isLoading, error, refetch } = useCampaign(Number(id));
   const { platformFeeBps, isLoading: isPlatformFeeLoading, isFallback } = usePlatformFee();
 
@@ -38,13 +33,23 @@ export default function CauseDetailClient({ id }: { id: string }) {
   const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
   const { showError, showSuccess, showWarning } = useToast();
 
-  useEffect(() => {
-    if (fetchedCampaign) setCampaign(fetchedCampaign);
-  }, [fetchedCampaign]);
+  useEffect(() => { if (fetchedCampaign) setCampaign(fetchedCampaign); }, [fetchedCampaign]);
 
   useEffect(() => {
     if (!userWalletAddress || !campaign) return;
     const existing = stellarVotingService.getUserVote(String(campaign.id), userWalletAddress);
+    if (existing) setUserVote({ causeId: String(campaign.id), voter: userWalletAddress, voteType: existing.voteType, timestamp: existing.timestamp, transactionHash: 'mock-hash' });
+  }, [userWalletAddress, campaign]);
+
+  const handleVote = async (campaignId: number, voteType: 'upvote' | 'downvote') => {
+    if (!userWalletAddress) { showWarning('Please connect your wallet first.'); return; }
+    const vid = String(campaignId);
+    if (stellarVotingService.hasUserVoted(vid, userWalletAddress)) { showWarning('You have already voted on this cause.'); return; }
+    setIsVoting(true);
+    try {
+      const transactionHash = await stellarVotingService.castVote(vid, voteType, userWalletAddress);
+      setUserVote({ causeId: vid, voter: userWalletAddress, voteType, timestamp: new Date(), transactionHash });
+      setVoteCounts((prev) => ({ upvotes: voteType === 'upvote' ? prev.upvotes + 1 : prev.upvotes, downvotes: voteType === 'downvote' ? prev.downvotes + 1 : prev.downvotes, totalVotes: prev.totalVotes + 1 }));
     if (existing) {
       setUserVote({
         causeId: String(campaign.id),
@@ -86,11 +91,8 @@ export default function CauseDetailClient({ id }: { id: string }) {
 
       // Trigger immediate refetch after successful transaction
       refetch();
-    } catch (error) {
-      showError(parseContractError(error));
-    } finally {
-      setIsVoting(false);
-    }
+    } catch (error) { showError(parseContractError(error)); }
+    finally { setIsVoting(false); }
   };
 
   if (isLoading) {
@@ -114,7 +116,6 @@ export default function CauseDetailClient({ id }: { id: string }) {
       </div>
     );
   }
-
   if (error) {
     return (
       <div className="min-h-screen bg-linear-to-br from-zinc-50 to-zinc-100 dark:from-zinc-900 dark:to-zinc-800">
@@ -175,24 +176,17 @@ export default function CauseDetailClient({ id }: { id: string }) {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="bg-white dark:bg-zinc-800 rounded-xl p-4 border border-zinc-200 dark:border-zinc-700 text-center">
-                <div className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">{voteCounts.totalVotes}</div>
-                <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Total Votes</div>
-              </div>
-              <div className="bg-white dark:bg-zinc-800 rounded-xl p-4 border border-zinc-200 dark:border-zinc-700 text-center">
-                <div className="text-2xl font-bold text-green-600 dark:text-green-400">{approvalRate}%</div>
-                <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Approval Rate</div>
-              </div>
-              <div className="bg-white dark:bg-zinc-800 rounded-xl p-4 border border-zinc-200 dark:border-zinc-700 text-center">
-                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{fundingPct}%</div>
-                <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Funded</div>
-              </div>
-              <div className="bg-white dark:bg-zinc-800 rounded-xl p-4 border border-zinc-200 dark:border-zinc-700 text-center">
-                <div className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
-                  {raised.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+              {[
+                { label: 'Total Votes', value: voteCounts.totalVotes, cls: 'text-zinc-900 dark:text-zinc-50' },
+                { label: 'Approval Rate', value: `${approvalRate}%`, cls: 'text-green-600 dark:text-green-400' },
+                { label: 'Funded', value: `${fundingPct}%`, cls: 'text-blue-600 dark:text-blue-400' },
+                { label: 'XLM Raised', value: raised.toLocaleString(undefined, { maximumFractionDigits: 2 }), cls: 'text-zinc-900 dark:text-zinc-50' },
+              ].map(({ label, value, cls }) => (
+                <div key={label} className="bg-white dark:bg-zinc-800 rounded-xl p-4 border border-zinc-200 dark:border-zinc-700 text-center">
+                  <div className={`text-2xl font-bold ${cls}`}>{value}</div>
+                  <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">{label}</div>
                 </div>
-                <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">XLM Raised</div>
-              </div>
+              ))}
             </div>
 
             <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-700 p-6">
@@ -217,16 +211,25 @@ export default function CauseDetailClient({ id }: { id: string }) {
               </div>
               <p className="mt-3 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
                 A platform fee of {platformFeePercent.toFixed(2)}% is deducted from funds when withdrawn by the creator.
-                Based on the current amount raised, that is {estimatedFeeAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })} XLM
-                in fees and {estimatedCreatorReceives.toLocaleString(undefined, { maximumFractionDigits: 2 })} XLM delivered to the creator.
+                Based on the current amount raised, that is {estimatedFeeAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })} XLM in fees and {estimatedCreatorReceives.toLocaleString(undefined, { maximumFractionDigits: 2 })} XLM delivered to the creator.
               </p>
-              {isFallback && (
-                <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-                  The on-chain fee getter is not available yet, so this page is using the current known fallback fee of 3%.
-                </p>
-              )}
+              {isFallback && <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">The on-chain fee getter is not available yet, so this page is using the current known fallback fee of 3%.</p>}
             </div>
 
+            {campaign.has_revenue_sharing && <RevenueSharingPanel campaign={campaign} onActionSuccess={refetch} />}
+          </div>
+
+          <div className="space-y-6">
+            <VotingComponent campaign={campaign} userWalletAddress={userWalletAddress} onVote={handleVote} userVote={userVote} isVoting={isVoting} upvotes={voteCounts.upvotes} downvotes={voteCounts.downvotes} totalVotes={voteCounts.totalVotes} />
+
+            {campaign.is_active && !campaign.is_cancelled && (
+              <button
+                onClick={() => { if (!userWalletAddress) { showWarning('Please connect your wallet first.'); return; } setIsDonationModalOpen(true); }}
+                className="w-full py-3 min-h-[44px] bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg"
+              >
+                💜 Fund This Cause
+              </button>
+            )}
             {campaign.has_revenue_sharing && (
               <RevenueSharingPanel campaign={campaign} onActionSuccess={refetch} />
             )}
@@ -269,10 +272,9 @@ export default function CauseDetailClient({ id }: { id: string }) {
             <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-700 p-5">
               <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 mb-3">Created by</h2>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
-                  {campaign.creator.slice(1, 3).toUpperCase()}
-                </div>
+                <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-sm font-bold">{campaign.creator.slice(1, 3).toUpperCase()}</div>
                 <div>
+                  <p className="text-sm font-mono text-zinc-700 dark:text-zinc-300 break-all">{campaign.creator.slice(0, 10)}...{campaign.creator.slice(-6)}</p>
                   <p className="text-sm font-mono text-zinc-700 dark:text-zinc-300 break-all">
                     {campaign.creator.slice(0, 10)}...{campaign.creator.slice(-6)}
                   </p>
@@ -288,6 +290,7 @@ export default function CauseDetailClient({ id }: { id: string }) {
                 <span className="text-red-500 dark:text-red-400 font-medium">✗ Reject ({voteCounts.downvotes})</span>
               </div>
               <div className="w-full bg-red-200 dark:bg-red-900/40 rounded-full h-2">
+                <div className="bg-green-500 h-2 rounded-full transition-all duration-300" style={{ width: voteCounts.totalVotes > 0 ? `${(voteCounts.upvotes / voteCounts.totalVotes) * 100}%` : '50%' }} />
                 <div
                   className="bg-green-500 h-2 rounded-full transition-all duration-300"
                   style={{ width: voteCounts.totalVotes > 0 ? `${(voteCounts.upvotes / voteCounts.totalVotes) * 100}%` : '50%' }}
@@ -296,6 +299,7 @@ export default function CauseDetailClient({ id }: { id: string }) {
               <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">{voteCounts.totalVotes} total votes cast</p>
             </div>
 
+            <Link href="/causes" className="block text-center px-4 py-3 min-h-[44px] border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 rounded-full text-sm hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors">
             <Link
               href="/causes"
               className="block text-center px-4 py-3 min-h-[44px] border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 rounded-full text-sm hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
