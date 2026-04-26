@@ -14,7 +14,7 @@ export interface UseCampaignResult {
 export function useCampaign(id: number): UseCampaignResult {
   const queryClient = useQueryClient();
 
-  const { data, isLoading, error } = useQuery<Campaign, Error>({
+  const { data, isLoading, error } = useQuery<Campaign | null, Error>({
     queryKey: ['campaign', id],
     queryFn: () => getCampaign(id),
     enabled: !!id,

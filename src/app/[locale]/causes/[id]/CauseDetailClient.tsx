@@ -297,9 +297,13 @@ export default function CauseDetailClient({ id }: { id: string }) {
               {isFallback && <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">The on-chain fee getter is not available yet, so this page is using the current known fallback fee of 3%.</p>}
             </div>
 
-            {campaign.has_revenue_sharing && <RevenueSharingPanel campaign={campaign} onActionSuccess={refetch} />}
+            {campaign.has_revenue_sharing && (
+              <RevenueSharingPanel
+                campaign={campaign}
+                onActionSuccess={refetch}
+              />
+            )}
 
-            {/* Claim Refund section */}
             {isRefundEligible && userWalletAddress && (
               <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-amber-200 dark:border-amber-700 p-6">
                 <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-2">

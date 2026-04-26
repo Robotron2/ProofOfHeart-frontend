@@ -150,31 +150,30 @@ export default function Navbar() {
       </div>
 
       {/* Mobile Menu */}
-      {
-        menuOpen && (
-          <div id="mobile-menu" className="border-t border-black/5 dark:border-white/10 md:hidden bg-white dark:bg-zinc-900 motion-safe:animate-in motion-safe:slide-in-from-top duration-300">
-            <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-6 sm:px-6">
-              <nav aria-label="Mobile">
-                <ul className="flex flex-col gap-2">
-                  {navLinks.map((link) => (
-                    <li key={link.href}>
-                      <Link
-                        href={link.href as Parameters<typeof Link>[0]['href']}
-                        onClick={() => setMenuOpen(false)}
-                        className={`block rounded-xl px-4 py-3 text-base font-semibold transition-all ${link.href === '/admin'
-                          ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
-                          : 'text-zinc-800 hover:bg-black/5 dark:text-zinc-200 dark:hover:bg-white/10'
-                          }`}
-                      >
-                        <span className="flex items-center gap-2">
-                          {link.href === '/admin' && <ShieldCheck size={18} />}
-                          {link.label}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
+      {menuOpen && (
+        <div id="mobile-menu" className="border-t border-black/5 dark:border-white/10 md:hidden bg-white dark:bg-zinc-900 motion-safe:animate-in motion-safe:slide-in-from-top duration-300">
+          <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-6 sm:px-6">
+            <nav aria-label="Mobile">
+              <ul className="flex flex-col gap-2">
+                {navLinks.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href as Parameters<typeof Link>[0]['href']}
+                      onClick={() => setMenuOpen(false)}
+                      className={`block rounded-xl px-4 py-3 text-base font-semibold transition-all ${link.href === '/admin'
+                        ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
+                        : 'text-zinc-800 hover:bg-black/5 dark:text-zinc-200 dark:hover:bg-white/10'
+                        }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        {link.href === '/admin' && <ShieldCheck size={18} />}
+                        {link.label}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
 
               {isWalletConnected && (
                 <Link
@@ -218,9 +217,8 @@ export default function Navbar() {
                 </div>
               )}
             </div>
-          </div>
-        )
-      }
-    </header >
+        </div>
+      )}
+    </header>
   );
 }

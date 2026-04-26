@@ -8,7 +8,6 @@ import { useWallet } from "@/components/WalletContext";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { getStellarBalance } from "@/lib/getStellarBalance";
 import { DashboardSkeleton, Spinner } from "@/components/Skeleton";
-
 import MyContributionsSection from "@/components/MyContributionsSection";
 
 export default function DashboardPage() {
@@ -52,9 +51,6 @@ export default function DashboardPage() {
   const submittedCampaigns = useMemo(() => campaigns.filter((c) => c.creator === publicKey), [campaigns, publicKey]);
 
   if (loading) return <DashboardSkeleton />;
-  if (loading) {
-    return <DashboardSkeleton />;
-  }
 
   if (!isWalletConnected || !publicKey) {
     return (
