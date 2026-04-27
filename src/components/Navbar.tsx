@@ -172,13 +172,14 @@ export default function Navbar() {
               <div className="flex items-center gap-3 pl-2">
                 <Link
                   href="/causes/new"
-                  className="inline-flex items-center gap-1.5 h-9 px-4 rounded-full bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/20"
+                  className="inline-flex items-center gap-1.5 h-9 px-3 lg:px-4 rounded-full bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/20"
+                  title={t('createCampaign')}
                 >
                   <Plus size={14} />
-                  {t('createCampaign')}
+                  <span className="hidden lg:inline">{t('createCampaign')}</span>
                 </Link>
                 <div className="flex flex-col items-end">
-                  <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-400 dark:text-zinc-500 leading-none mb-1">
+                  <span className="hidden lg:block text-[10px] uppercase tracking-wider font-bold text-zinc-400 dark:text-zinc-500 leading-none mb-1">
                     Connected
                   </span>
                   <span className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-xs font-mono font-bold border border-blue-100 dark:border-blue-800">
