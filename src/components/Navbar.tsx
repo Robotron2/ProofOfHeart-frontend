@@ -10,6 +10,8 @@ import { Link } from '@/i18n/routing';
 import { getAdmin } from "@/lib/contractClient";
 import { formatAddress } from "@/lib/formatAddress";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { useCampaigns } from "@/hooks/useCampaigns";
+import { useMemo } from "react";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -19,6 +21,11 @@ export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
   const t = useTranslations('Common');
   const [adminAddress, setAdminAddress] = useState<string | null>(null);
+
+  const { campaigns } = useCampaigns();
+  const pendingCount = useMemo(() => {
+    return campaigns.filter(c => !c.is_verified && c.is_active && !c.is_cancelled).length;
+  }, [campaigns]);
 
   const networkPassphrase = process.env.NEXT_PUBLIC_NETWORK_PASSPHRASE || '';
   const isTestnet = networkPassphrase.includes('Test SDF');
@@ -117,6 +124,11 @@ export default function Navbar() {
               <span className="flex items-center gap-1.5">
                 {link.href === '/admin' && <ShieldCheck size={14} className="text-blue-500" />}
                 {link.label}
+                {link.href === '/admin' && pendingCount > 0 && (
+                  <span className="ml-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white animate-in zoom-in duration-300">
+                    {pendingCount}
+                  </span>
+                )}
               </span>
               <span className="absolute bottom-1 left-4 right-4 h-0.5 bg-blue-500 scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
             </Link>
@@ -220,6 +232,11 @@ export default function Navbar() {
                       <span className="flex items-center gap-2">
                         {link.href === '/admin' && <ShieldCheck size={18} />}
                         {link.label}
+                        {link.href === '/admin' && pendingCount > 0 && (
+                          <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                            {pendingCount}
+                          </span>
+                        )}
                       </span>
                     </Link>
                   </li>
